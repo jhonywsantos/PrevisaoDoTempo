@@ -35,7 +35,7 @@ async function searchWeather() {
     
     try {
         // 1. Primeiro obtemos as coordenadas da cidade
-        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=pt`;
+        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=5&language=pt`;
         const geoResponse = await fetch(geoUrl);
         const geoData = await geoResponse.json();
         
@@ -43,20 +43,82 @@ async function searchWeather() {
             throw new Error('Cidade não encontrada. Verifique o nome e tente novamente.');
         }
         
-        const location = geoData.results[0];
-        const lat = location.latitude;
-        const lon = location.longitude;
-        const locationName = location.name || city;
-        
-        // Salvar a última cidade pesquisada
-        localStorage.setItem('lastCity', city);
-        
-        // 2. Agora obtemos os dados meteorológicos
-        await fetchWeatherData(lat, lon, locationName);
+        // Se houver várias cidades com o mesmo nome, peça para selecionar
+        if (geoData.results.length > 1) {
+            const selectedLocation = await selectLocation(geoData.results);
+            if (!selectedLocation) return;
+            
+            const locationData = {
+                name: selectedLocation.name,
+                state: selectedLocation.admin1,
+                country: selectedLocation.country
+            };
+            
+            localStorage.setItem('lastCity', `${selectedLocation.name}, ${selectedLocation.admin1 || selectedLocation.country}`);
+            await fetchWeatherData(selectedLocation.latitude, selectedLocation.longitude, locationData);
+        } else {
+            const location = geoData.results[0];
+            const locationData = {
+                name: location.name,
+                state: location.admin1,
+                country: location.country
+            };
+            
+            localStorage.setItem('lastCity', `${location.name}, ${location.admin1 || location.country}`);
+            await fetchWeatherData(location.latitude, location.longitude, locationData);
+        }
     } catch (error) {
         showError(error.message);
         console.error('Erro ao buscar dados:', error);
     }
+}
+
+// Função para selecionar entre cidades com mesmo nome
+async function selectLocation(locations) {
+    // Criar modal de seleção
+    const modal = document.createElement('div');
+    modal.className = 'location-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>Várias localizações encontradas</h3>
+            <p>Selecione a cidade correta:</p>
+            <ul class="location-list">
+                ${locations.map(loc => `
+                    <li data-lat="${loc.latitude}" data-lon="${loc.longitude}" 
+                        data-name="${loc.name}" data-state="${loc.admin1}" data-country="${loc.country}">
+                        <strong>${loc.name}</strong>, ${loc.admin1 || loc.country}
+                        <div class="location-details">
+                            <small>${loc.country} • Lat: ${loc.latitude.toFixed(2)}, Lon: ${loc.longitude.toFixed(2)}</small>
+                        </div>
+                    </li>
+                `).join('')}
+            </ul>
+            <button class="cancel-button">Cancelar</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Esperar pela seleção do usuário
+    return new Promise((resolve) => {
+        modal.querySelector('.cancel-button').addEventListener('click', () => {
+            modal.remove();
+            resolve(null);
+        });
+        
+        modal.querySelectorAll('.location-list li').forEach(item => {
+            item.addEventListener('click', () => {
+                modal.remove();
+                resolve({
+                    latitude: parseFloat(item.dataset.lat),
+                    longitude: parseFloat(item.dataset.lon),
+                    name: item.dataset.name,
+                    admin1: item.dataset.state,
+                    country: item.dataset.country
+                });
+            });
+        });
+    });
 }
 
 // Função para obter clima por geolocalização
@@ -81,11 +143,25 @@ async function getLocationWeather() {
             const reverseData = await reverseResponse.json();
             
             const locationName = reverseData.results?.[0]?.name || 'Sua Localização';
-            elements.cityInput.value = locationName;
-            await fetchWeatherData(lat, lon, locationName);
+            const locationState = reverseData.results?.[0]?.admin1 || '';
+            const locationCountry = reverseData.results?.[0]?.country || '';
+            
+            elements.cityInput.value = `${locationName}${locationState ? ', ' + locationState : ''}`;
+            
+            const locationData = {
+                name: locationName,
+                state: locationState,
+                country: locationCountry
+            };
+            
+            await fetchWeatherData(lat, lon, locationData);
         } catch {
             // Se falhar, usar apenas as coordenadas
-            await fetchWeatherData(lat, lon, 'Sua Localização');
+            await fetchWeatherData(lat, lon, {
+                name: 'Sua Localização',
+                state: '',
+                country: ''
+            });
         }
     } catch (error) {
         showError('Não foi possível obter sua localização. Por favor, permita o acesso ou pesquise por uma cidade.');
@@ -94,7 +170,7 @@ async function getLocationWeather() {
 }
 
 // Função para buscar dados meteorológicos
-async function fetchWeatherData(latitude, longitude, locationName) {
+async function fetchWeatherData(latitude, longitude, locationData) {
     try {
         showLoading();
         
@@ -106,7 +182,7 @@ async function fetchWeatherData(latitude, longitude, locationName) {
             throw new Error('Dados meteorológicos não disponíveis para esta localização.');
         }
         
-        displayWeatherData(locationName, weatherData);
+        displayWeatherData(locationData, weatherData);
     } catch (error) {
         showError('Erro ao obter dados do tempo. Por favor, tente novamente.');
         console.error('Erro ao buscar dados meteorológicos:', error);
@@ -114,12 +190,13 @@ async function fetchWeatherData(latitude, longitude, locationName) {
 }
 
 // Função para exibir dados na interface
-function displayWeatherData(locationName, weatherData) {
+function displayWeatherData(locationData, weatherData) {
     // Dados atuais
     const current = weatherData.current_weather;
     const daily = weatherData.daily;
     
-    // Atualizar elementos da interface
+    // Formatar nome da localização (cidade, estado ou país)
+    const locationName = `${locationData.name}${locationData.state ? ', ' + locationData.state : locationData.country ? ', ' + locationData.country : ''}`;
     elements.locationName.textContent = locationName;
     elements.currentDate.textContent = formatDate(current.time);
     elements.currentTemp.textContent = `${Math.round(current.temperature)}°C`;
