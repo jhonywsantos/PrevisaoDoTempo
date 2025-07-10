@@ -1,0 +1,265 @@
+:root {
+    --primary-color: #4361ee;
+    --secondary-color: #3f37c9;
+    --accent-color: #4895ef;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --success-color: #4cc9f0;
+    --warning-color: #f72585;
+    --border-radius: 8px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.header {
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.header h1 {
+    margin-bottom: 20px;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.search-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.search-container input {
+    flex: 1;
+    padding: 12px 15px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+}
+
+.search-container button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--border-radius);
+    background-color: var(--accent-color);
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.search-container button:hover {
+    background-color: #3a7bd5;
+}
+
+#locationButton {
+    width: 50px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 15px;
+    margin: 0 20px;
+    border-radius: var(--border-radius);
+    border-left: 4px solid #c62828;
+}
+
+.error-message.hidden {
+    display: none;
+}
+
+.current-weather {
+    padding: 20px;
+}
+
+.current-weather.hidden {
+    display: none;
+}
+
+.location-info {
+    margin-bottom: 20px;
+}
+
+.location-info h2 {
+    font-size: 1.8rem;
+    color: var(--dark-color);
+}
+
+.date {
+    color: #6c757d;
+    font-size: 1rem;
+}
+
+.weather-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.temperature {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+#currentTemp {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: var(--dark-color);
+}
+
+.weather-condition p:first-child {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.weather-condition p:last-child {
+    color: #6c757d;
+}
+
+#weatherIcon {
+    font-size: 4rem;
+    color: #f39c12;
+}
+
+.min-max-temp {
+    background-color: #e9ecef;
+    padding: 10px;
+    border-radius: var(--border-radius);
+    text-align: center;
+    font-weight: 500;
+}
+
+.forecast {
+    padding: 20px;
+}
+
+.forecast h2 {
+    margin-bottom: 20px;
+    color: var(--dark-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#forecastContainer {
+    display: grid;
+    gap: 15px;
+}
+
+.forecast-day {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.forecast-day:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.day-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.day-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.day-date {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.day-icon {
+    font-size: 1.8rem;
+    color: #3498db;
+    min-width: 40px;
+    text-align: center;
+}
+
+.day-temp {
+    font-weight: 600;
+}
+
+footer {
+    text-align: center;
+    padding: 15px;
+    color: #6c757d;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .search-container {
+        flex-direction: column;
+    }
+    
+    .weather-display {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    .temperature {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #weatherIcon {
+        margin: 0 auto;
+    }
+}
