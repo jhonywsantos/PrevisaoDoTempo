@@ -2,8 +2,6 @@
 
 Projeto de consulta meteorológica que fornece informações atualizadas do tempo utilizando API pública.
 
-[🔗 Acesse a aplicação](https://jhonywsantos.github.io/PrevisaoDoTempo/)
-
 ## 🛠️ Tecnologias
 <div>
   <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5">
